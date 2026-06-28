@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, func
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -48,8 +48,8 @@ class UserAccount(TimestampMixin, Base):
     assigned_ip: Mapped[str | None] = mapped_column(String(64), nullable=True)
     nas_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
     online_since: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    download_bytes: Mapped[int] = mapped_column(Integer, default=0)
-    upload_bytes: Mapped[int] = mapped_column(Integer, default=0)
+    download_bytes: Mapped[int] = mapped_column(BigInteger, default=0)
+    upload_bytes: Mapped[int] = mapped_column(BigInteger, default=0)
 
     tenant: Mapped[Tenant] = relationship(back_populates="users")
     invoices: Mapped[list["Invoice"]] = relationship(back_populates="user")
@@ -126,4 +126,3 @@ class Reseller(TimestampMixin, Base):
     status: Mapped[str] = mapped_column(String(32), default="active")
 
     tenant: Mapped[Tenant] = relationship(back_populates="resellers")
-
