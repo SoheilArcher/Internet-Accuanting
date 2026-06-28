@@ -1,0 +1,987 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accounting SaaS Prototype</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --ink: #17212f;
+      --muted: #65758b;
+      --line: #d9e2ee;
+      --panel: #fff;
+      --nav: #142033;
+      --nav2: #1c2d45;
+      --green: #168474;
+      --blue: #286bd8;
+      --red: #b33d3d;
+      --amber: #b96e12;
+      --soft-green: #eaf7f4;
+      --soft-blue: #edf4ff;
+      --soft-red: #fff0f0;
+      --soft-amber: #fff7e8;
+      --shadow: 0 14px 36px rgba(25, 39, 58, .08);
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+    }
+
+    aside {
+      background: var(--nav);
+      color: #dbe6f5;
+      padding: 22px 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 6px 22px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      margin-bottom: 18px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: #20a392;
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    .brand strong { display: block; color: #fff; font-size: 15px; }
+    .brand span { display: block; color: #aebbd0; font-size: 12px; margin-top: 4px; }
+
+    .nav-title {
+      font-size: 11px;
+      color: #8fa0b9;
+      margin: 18px 9px 8px;
+    }
+
+    .nav-link {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #dbe6f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .nav-link.active,
+    .nav-link:hover { background: var(--nav2); color: #fff; }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: #6f8099;
+      flex: 0 0 auto;
+    }
+    .nav-link.active .dot { background: #35c2ad; }
+
+    main {
+      padding: 22px;
+      max-width: 1500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 { margin: 0 0 6px; font-size: 23px; letter-spacing: 0; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+    .mode-switch {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 4px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .mode-switch button {
+      border: 0;
+      background: transparent;
+      border-radius: 6px;
+      padding: 9px 14px;
+      font: inherit;
+      cursor: pointer;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .mode-switch button.active {
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .grid { display: grid; gap: 14px; }
+    .kpis { grid-template-columns: repeat(4, minmax(150px, 1fr)); margin-bottom: 14px; }
+    .layout { grid-template-columns: minmax(0, 1.35fr) minmax(360px, .85fr); align-items: start; }
+    .two { grid-template-columns: 1fr 1fr; }
+    .three { grid-template-columns: repeat(3, 1fr); }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 15px;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    h2 { margin: 0; font-size: 16px; }
+    h3 { margin: 0 0 8px; font-size: 14px; }
+
+    .kpi small { color: var(--muted); font-size: 12px; }
+    .kpi b { display: block; font-size: 27px; margin: 8px 0 5px; }
+    .kpi span { color: var(--muted); font-size: 12px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 99px;
+      font-size: 11px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      background: #fbfcfe;
+      white-space: nowrap;
+    }
+    .ok { background: var(--soft-green); color: var(--green); border-color: #c8eadf; }
+    .warn { background: var(--soft-amber); color: var(--amber); border-color: #f0d1a2; }
+    .lock { background: var(--soft-red); color: var(--red); border-color: #edc4c4; }
+    .blue { background: var(--soft-blue); color: var(--blue); border-color: #cbdcf8; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    th, td { padding: 10px 9px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+    th { background: #f8fafc; color: var(--muted); font-weight: 700; }
+    tr:last-child td { border-bottom: 0; }
+
+    .bar-chart {
+      height: 190px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 8px;
+      align-items: end;
+      padding: 10px 4px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .bar {
+      min-height: 18px;
+      border-radius: 6px 6px 0 0;
+      background: var(--blue);
+      position: relative;
+    }
+    .bar:nth-child(3n) { background: var(--green); }
+    .bar:nth-child(4n) { background: #74839a; }
+    .bar::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: 1fr 34px 1fr 34px 1fr;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .node {
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      border-radius: 8px;
+      padding: 14px 10px;
+      min-height: 86px;
+      display: grid;
+      align-content: center;
+      gap: 7px;
+      text-align: center;
+    }
+    .node strong { font-size: 13px; }
+    .node span { color: var(--muted); font-size: 11px; }
+    .arrow {
+      height: 2px;
+      background: var(--line);
+      position: relative;
+    }
+    .arrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-top: 2px solid var(--line);
+      border-left: 2px solid var(--line);
+      position: absolute;
+      left: -1px;
+      top: -4px;
+      transform: rotate(-45deg);
+    }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1.1fr repeat(3, 90px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 12px;
+    }
+    .matrix div { padding: 10px; border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); background: #fff; }
+    .matrix div:nth-child(-n+4) { background: #f8fafc; color: var(--muted); font-weight: 700; }
+    .matrix div:nth-last-child(-n+4) { border-bottom: 0; }
+    .yes { color: var(--green); font-weight: 800; }
+    .no { color: var(--red); font-weight: 800; }
+
+    .module {
+      background: #fbfcfe;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      min-height: 126px;
+    }
+    .module p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+
+    .license-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      background: #fbfcfe;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 99px;
+      background: #e8eef6;
+      overflow: hidden;
+    }
+    .progress span { display: block; height: 100%; background: var(--green); border-radius: inherit; }
+    .progress.warn span { background: var(--amber); }
+
+    .blocked-panel {
+      min-height: 220px;
+      border: 1px dashed #e2b8b8;
+      background: linear-gradient(0deg, #fff, #fff7f7);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 22px;
+    }
+    .blocked-panel .lock-shape {
+      width: 58px;
+      height: 44px;
+      border-radius: 8px;
+      background: var(--red);
+      margin: 0 auto 14px;
+      position: relative;
+    }
+    .blocked-panel .lock-shape::before {
+      content: "";
+      width: 28px;
+      height: 24px;
+      border: 6px solid var(--red);
+      border-bottom: 0;
+      border-radius: 18px 18px 0 0;
+      position: absolute;
+      top: -24px;
+      left: 15px;
+    }
+    .blocked-panel strong { display: block; font-size: 15px; margin-bottom: 7px; }
+    .blocked-panel p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 7px;
+      padding: 9px 12px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    .tab.active { background: var(--green); color: #fff; border-color: var(--green); font-weight: 700; }
+
+    .tenant-only { display: none; }
+    body.tenant-mode .owner-only { display: none; }
+    body.tenant-mode .tenant-only { display: block; }
+    body.tenant-mode .owner-label { display: none; }
+
+    a { color: var(--blue); text-decoration: none; }
+
+    @media (max-width: 1120px) {
+      .app { grid-template-columns: 1fr; }
+      aside { position: static; height: auto; }
+      .nav-section { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+      .kpis, .layout, .two, .three { grid-template-columns: 1fr; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .flow { grid-template-columns: 1fr; }
+      .arrow { height: 26px; width: 2px; margin: 0 auto; }
+      .arrow::before { left: -4px; top: 17px; transform: rotate(-135deg); }
+    }
+  </style>
+</head>
+<body class="owner-mode">
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">AC</div>
+        <div>
+          <strong>Accounting SaaS</strong>
+          <span>Owner Control Panel</span>
+        </div>
+      </div>
+
+      <div class="nav-title">نمایش‌ها</div>
+      <div class="nav-section">
+        <button class="nav-link active" data-page="dashboard"><span>داشبورد مالک</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="licenses"><span>لایسنس‌ها</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="users"><span>کاربران</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="userManager"><span>User Manager</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="online"><span>یوزر آنلاین</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="billing"><span>درآمد و فاکتورها</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="routers"><span>روترها / NAS</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="tickets"><span>تیکت‌ها</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="modules"><span>امکانات محصول</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="access"><span>دسترسی‌ها</span><span class="dot"></span></button>
+        <button class="nav-link" data-page="attribution"><span>مقصد مشترک</span><span class="dot"></span></button>
+      </div>
+
+      <div class="nav-title">اسناد</div>
+      <div class="nav-section">
+        <a class="nav-link" href="/docs/saas-licensing.md"><span>مدل SaaS</span><span class="dot"></span></a>
+        <a class="nav-link" href="/docs/architecture.md"><span>معماری</span><span class="dot"></span></a>
+        <a class="nav-link" href="/docs/user-manager-reseller-control.md"><span>User Manager Doc</span><span class="dot"></span></a>
+      </div>
+    </aside>
+
+    <main>
+      <div class="topbar">
+        <div>
+          <h1>پروتوتایپ گرافیکی اکانتینگ مرکزی</h1>
+          <p class="subtitle">یک سرور مرکزی، فروش لایسنس یک‌ساله، tenant جدا برای هر خریدار، و کنترل کامل مالک پلتفرم.</p>
+        </div>
+        <div class="mode-switch">
+          <button class="active" id="ownerMode">نمای مالک</button>
+          <button id="tenantMode">نمای خریدار</button>
+        </div>
+      </div>
+
+      <section class="page active" id="dashboard">
+        <div class="grid kpis">
+          <div class="card kpi"><small>لایسنس فعال</small><b>۴۸</b><span>۷ مورد نزدیک تمدید</span></div>
+          <div class="card kpi"><small>درآمد ماه</small><b>۳.۲B</b><span>ریال، شامل تمدیدها</span></div>
+          <div class="card kpi"><small>کاربران آنلاین کل</small><b>۱۲,۴۸۰</b><span>از همه tenantها</span></div>
+          <div class="card kpi"><small>گزارش مقصد</small><b>قفل</b><span>فقط در سطح مالک</span></div>
+        </div>
+
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>نمای کلی tenantها</h2>
+              <span class="badge ok owner-label">دسترسی مالک</span>
+              <span class="badge blue tenant-only">داده‌های tenant خودتان</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>اپراتور</th><th>پکیج</th><th>آنلاین</th><th>وضعیت لایسنس</th><th>گزارش مقصد</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>اپراتور شرق</td><td>Full ISP</td><td>۳,۲۱۰</td><td><span class="badge ok">فعال</span></td><td><span class="badge lock">Owner Only</span></td></tr>
+                <tr><td>نت سرویس آریا</td><td>VPN + RADIUS</td><td>۱,۸۹۰</td><td><span class="badge warn">تمدید نزدیک</span></td><td><span class="badge lock">قفل</span></td></tr>
+                <tr><td>شبکه پارس</td><td>Accounting Pro</td><td>۴,۶۳۰</td><td><span class="badge ok">فعال</span></td><td><span class="badge lock">قفل</span></td></tr>
+                <tr><td>رسانه نو</td><td>Reseller Pack</td><td>۹۸۰</td><td><span class="badge ok">فعال</span></td><td><span class="badge lock">قفل</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>درآمد لایسنس</h2>
+              <span class="badge blue">۱۲ ماه</span>
+            </div>
+            <div class="bar-chart" aria-label="license revenue chart">
+              <div class="bar" style="height:48%" data-label="فر"></div>
+              <div class="bar" style="height:52%" data-label="ار"></div>
+              <div class="bar" style="height:66%" data-label="خر"></div>
+              <div class="bar" style="height:58%" data-label="تی"></div>
+              <div class="bar" style="height:72%" data-label="مر"></div>
+              <div class="bar" style="height:80%" data-label="شه"></div>
+              <div class="bar" style="height:69%" data-label="مه"></div>
+              <div class="bar" style="height:74%" data-label="آب"></div>
+              <div class="bar" style="height:88%" data-label="آذ"></div>
+              <div class="bar" style="height:78%" data-label="دی"></div>
+              <div class="bar" style="height:92%" data-label="به"></div>
+              <div class="bar" style="height:86%" data-label="اس"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="licenses">
+        <div class="grid three">
+          <div class="license-card">
+            <div class="card-head"><h2>اپراتور شرق</h2><span class="badge ok">فعال</span></div>
+            <div class="progress"><span style="width:72%"></span></div>
+            <table><tbody><tr><td>شروع</td><td>۱۴۰۵/۰۴/۰۶</td></tr><tr><td>انقضا</td><td>۱۴۰۶/۰۴/۰۶</td></tr><tr><td>امکانات</td><td>Full ISP</td></tr></tbody></table>
+          </div>
+          <div class="license-card">
+            <div class="card-head"><h2>نت سرویس آریا</h2><span class="badge warn">تمدید نزدیک</span></div>
+            <div class="progress warn"><span style="width:91%"></span></div>
+            <table><tbody><tr><td>شروع</td><td>۱۴۰۴/۰۵/۱۲</td></tr><tr><td>انقضا</td><td>۱۴۰۵/۰۵/۱۲</td></tr><tr><td>امکانات</td><td>VPN + RADIUS</td></tr></tbody></table>
+          </div>
+          <div class="license-card">
+            <div class="card-head"><h2>شبکه پارس</h2><span class="badge ok">فعال</span></div>
+            <div class="progress"><span style="width:41%"></span></div>
+            <table><tbody><tr><td>شروع</td><td>۱۴۰۵/۰۱/۲۰</td></tr><tr><td>انقضا</td><td>۱۴۰۶/۰۱/۲۰</td></tr><tr><td>امکانات</td><td>Accounting Pro</td></tr></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="users">
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>مدیریت کاربران</h2>
+              <span class="badge ok">Add / Edit / Suspend</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>نام کاربری</th><th>مشتری</th><th>سرویس</th><th>اعتبار</th><th>وضعیت</th><th>عملیات</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>mohsen-021</td><td>محسن رضایی</td><td>PPPoE 100GB</td><td>۱۸ روز</td><td><span class="badge ok">فعال</span></td><td><span class="badge blue">ویرایش</span></td></tr>
+                <tr><td>sara-vpn</td><td>سارا احمدی</td><td>VPN Pro</td><td>۶۲ روز</td><td><span class="badge ok">فعال</span></td><td><span class="badge blue">تمدید</span></td></tr>
+                <tr><td>ali-home</td><td>علی کریمی</td><td>ADSL 250GB</td><td>۰ روز</td><td><span class="badge warn">منقضی</span></td><td><span class="badge lock">قطع</span></td></tr>
+                <tr><td>office-77</td><td>شرکت دفتر ۷۷</td><td>Static IP</td><td>۱۱ روز</td><td><span class="badge ok">فعال</span></td><td><span class="badge blue">جزئیات</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>افزودن یوزر</h2>
+              <span class="badge blue">Quick Create</span>
+            </div>
+            <div class="grid">
+              <div class="module">
+                <h3>اطلاعات کاربر</h3>
+                <p>نام کاربری، رمز، موبایل، مالک/نماینده، گروه مشتری و وضعیت اولیه.</p>
+              </div>
+              <div class="module">
+                <h3>سرویس</h3>
+                <p>انتخاب پلن، حجم، مدت، سرعت، IP ثابت، NAS مجاز و تاریخ شروع.</p>
+              </div>
+              <div class="module">
+                <h3>مالی</h3>
+                <p>صدور فاکتور، پرداخت دستی/آنلاین، کسر از کیف پول یا ثبت بدهی.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <span class="badge ok">ساخت کاربر</span>
+              <span class="badge blue">ارسال SMS</span>
+              <span class="badge blue">ساخت در RADIUS/Marzban</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><h2>جریان ساخت یوزر</h2><span class="badge blue">User Provisioning</span></div>
+          <div class="flow">
+            <div class="node"><strong>فرم کاربر</strong><span>مشخصات و مالک</span></div>
+            <div class="arrow"></div>
+            <div class="node"><strong>پلن و پرداخت</strong><span>فاکتور یا کیف پول</span></div>
+            <div class="arrow"></div>
+            <div class="node"><strong>Provision</strong><span>RADIUS / Marzban / MikroTik</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="userManager">
+        <div class="grid kpis">
+          <div class="card kpi"><small>شارژ امروز کاربران</small><b>۳۲۰M</b><span>از پورتال مشترکین</span></div>
+          <div class="card kpi"><small>تمدید موفق</small><b>۱۴۸</b><span>سرویس تمدید شده</span></div>
+          <div class="card kpi"><small>فروش ریسلرها</small><b>۲.۱B</b><span>ماه جاری</span></div>
+          <div class="card kpi"><small>تیکت‌های مشترکین</small><b>۳۷</b><span>باز و در حال بررسی</span></div>
+        </div>
+
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>پورتال مشترک</h2>
+              <span class="badge ok">User Manager</span>
+            </div>
+            <div class="grid three">
+              <div class="module">
+                <h3>سرویس من</h3>
+                <p>مشترک سرویس فعال، حجم باقی‌مانده، تاریخ انقضا، سرعت و وضعیت اتصال را می‌بیند.</p>
+              </div>
+              <div class="module">
+                <h3>شارژ و تمدید</h3>
+                <p>مشترک می‌تواند کیف پول را شارژ کند، فاکتور پرداخت کند، سرویس را تمدید کند یا ترافیک اضافه بخرد.</p>
+              </div>
+              <div class="module">
+                <h3>تیکت پشتیبانی</h3>
+                <p>مشترک تیکت می‌زند، پاسخ می‌دهد، وضعیت را می‌بیند و فایل یا رسید پیوست می‌کند.</p>
+              </div>
+            </div>
+            <table style="margin-top:12px">
+              <thead><tr><th>مشترک</th><th>سرویس</th><th>اقدام اخیر</th><th>وضعیت</th></tr></thead>
+              <tbody>
+                <tr><td>mohsen-021</td><td>PPPoE 100GB</td><td>شارژ کیف پول</td><td><span class="badge ok">موفق</span></td></tr>
+                <tr><td>sara-vpn</td><td>VPN Pro</td><td>تمدید یک‌ساله</td><td><span class="badge ok">موفق</span></td></tr>
+                <tr><td>ali-home</td><td>ADSL 250GB</td><td>ثبت تیکت</td><td><span class="badge warn">باز</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>کنترل مدیر ISP</h2>
+              <span class="badge blue">ISP Manager</span>
+            </div>
+            <div class="matrix">
+              <div>قابلیت</div><div>ISP</div><div>Reseller</div><div>User</div>
+              <div>ساخت مشترک</div><div class="yes">بله</div><div class="yes">اگر مجاز</div><div class="no">خیر</div>
+              <div>شارژ سرویس</div><div class="yes">بله</div><div class="yes">محدود</div><div class="yes">خودش</div>
+              <div>درصد فروش</div><div class="yes">بله</div><div class="no">خیر</div><div class="no">خیر</div>
+              <div>کنترل ریسلر</div><div class="yes">بله</div><div class="yes">زیرشاخه</div><div class="no">خیر</div>
+              <div>تیکت‌ها</div><div class="yes">همه</div><div class="yes">مشتری خودش</div><div class="yes">خودش</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:14px">
+          <div class="card">
+            <div class="card-head"><h2>مدیریت فروش و درصد ریسلر</h2><span class="badge blue">Sales Control</span></div>
+            <table>
+              <thead><tr><th>ریسلر</th><th>اعتبار</th><th>فروش ماه</th><th>درصد</th><th>محدودیت</th></tr></thead>
+              <tbody>
+                <tr><td>Reseller Babak</td><td>۵۰۰M</td><td>۱.۲B</td><td>۱۸٪</td><td><span class="badge ok">فعال</span></td></tr>
+                <tr><td>Reseller Moridi</td><td>۱۴۰M</td><td>۴۸۰M</td><td>۱۲٪</td><td><span class="badge warn">اعتبار کم</span></td></tr>
+                <tr><td>Reseller Kamali</td><td>۷۲۰M</td><td>۲.۴B</td><td>۲۲٪</td><td><span class="badge ok">فعال</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>فلو User Manager</h2><span class="badge ok">Self Service</span></div>
+            <div class="flow">
+              <div class="node"><strong>مشترک</strong><span>شارژ، تمدید، تیکت</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>Reseller/ISP</strong><span>فروش، درصد، کنترل</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>Provision</strong><span>RADIUS / Marzban</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="online">
+        <div class="grid kpis">
+          <div class="card kpi"><small>آنلاین tenant</small><b>۳,۲۱۰</b><span>در نمای خریدار فقط tenant خودش</span></div>
+          <div class="card kpi"><small>مصرف امروز</small><b>۸.۷TB</b><span>آپلود + دانلود</span></div>
+          <div class="card kpi"><small>NAS فعال</small><b>۱۲</b><span>MikroTik / BRAS</span></div>
+          <div class="card kpi"><small>Session خطادار</small><b>۱۸</b><span>نیاز به بررسی</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>یوزرهای آنلاین</h2>
+            <span class="badge ok">Live Sessions</span>
+          </div>
+          <table>
+            <thead>
+              <tr><th>یوزر</th><th>IP اختصاص داده شده</th><th>NAS</th><th>شروع اتصال</th><th>دانلود</th><th>آپلود</th><th>عملیات</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>mohsen-021</td><td>10.8.12.44</td><td>NAS-Tehran</td><td>08:42</td><td>4.8GB</td><td>620MB</td><td><span class="badge lock">قطع اتصال</span></td></tr>
+              <tr><td>sara-vpn</td><td>10.9.3.11</td><td>VPN-Node-2</td><td>09:18</td><td>1.2GB</td><td>210MB</td><td><span class="badge blue">جزئیات</span></td></tr>
+              <tr><td>office-77</td><td>172.20.4.19</td><td>BRAS-Mashhad</td><td>10:05</td><td>18.1GB</td><td>2.9GB</td><td><span class="badge blue">مصرف</span></td></tr>
+              <tr><td>reza-home</td><td>10.10.8.72</td><td>NAS-Shiraz</td><td>10:33</td><td>840MB</td><td>95MB</td><td><span class="badge lock">قطع اتصال</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="page" id="billing">
+        <div class="grid kpis">
+          <div class="card kpi"><small>درآمد امروز</small><b>۸۴۰M</b><span>پرداخت موفق سرویس‌ها</span></div>
+          <div class="card kpi"><small>درآمد ماه</small><b>۱۲.۶B</b><span>فروش + تمدید + IP ثابت</span></div>
+          <div class="card kpi"><small>فاکتور باز</small><b>۱۲۸</b><span>در انتظار پرداخت</span></div>
+          <div class="card kpi"><small>بدهی مشتریان</small><b>۱.۹B</b><span>قابل پیگیری توسط مالی</span></div>
+        </div>
+
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>فاکتور محصولات و سرویس‌ها</h2>
+              <span class="badge ok">Tenant Finance</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>شماره</th><th>مشتری</th><th>محصول/سرویس</th><th>مبلغ</th><th>وضعیت</th><th>تاریخ</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>INV-20391</td><td>محسن رضایی</td><td>PPPoE 100GB - تمدید</td><td>۲,۴۰۰,۰۰۰</td><td><span class="badge ok">پرداخت شد</span></td><td>۱۴۰۵/۰۴/۰۶</td></tr>
+                <tr><td>INV-20390</td><td>سارا احمدی</td><td>VPN Pro یک‌ساله</td><td>۶,۸۰۰,۰۰۰</td><td><span class="badge ok">پرداخت شد</span></td><td>۱۴۰۵/۰۴/۰۶</td></tr>
+                <tr><td>INV-20388</td><td>شرکت دفتر ۷۷</td><td>IP ثابت + سرویس سازمانی</td><td>۱۸,۵۰۰,۰۰۰</td><td><span class="badge warn">در انتظار</span></td><td>۱۴۰۵/۰۴/۰۵</td></tr>
+                <tr><td>INV-20377</td><td>علی کریمی</td><td>ADSL 250GB</td><td>۳,۲۰۰,۰۰۰</td><td><span class="badge lock">سررسید گذشته</span></td><td>۱۴۰۵/۰۴/۰۱</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>درآمد بر اساس محصول</h2>
+              <span class="badge blue">ماه جاری</span>
+            </div>
+            <div class="bar-chart">
+              <div class="bar" style="height:86%" data-label="PPPoE"></div>
+              <div class="bar" style="height:62%" data-label="VPN"></div>
+              <div class="bar" style="height:38%" data-label="IP"></div>
+              <div class="bar" style="height:71%" data-label="تمدید"></div>
+              <div class="bar" style="height:44%" data-label="نماینده"></div>
+              <div class="bar" style="height:52%" data-label="اضافه"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:14px">
+          <div class="card">
+            <div class="card-head"><h2>پرداخت‌ها</h2><span class="badge ok">Gateway / Manual</span></div>
+            <table>
+              <thead><tr><th>روش</th><th>تعداد</th><th>مبلغ</th><th>وضعیت</th></tr></thead>
+              <tbody>
+                <tr><td>درگاه آنلاین</td><td>۲۳۱</td><td>۷.۸B</td><td><span class="badge ok">تسویه شده</span></td></tr>
+                <tr><td>پرداخت دستی</td><td>۵۲</td><td>۱.۱B</td><td><span class="badge blue">ثبت مالی</span></td></tr>
+                <tr><td>کیف پول</td><td>۸۹</td><td>۲.۴B</td><td><span class="badge ok">کسر شده</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>عملیات مالی سریع</h2><span class="badge blue">Accounting</span></div>
+            <div class="grid">
+              <div class="module"><h3>صدور فاکتور</h3><p>برای محصول، تمدید سرویس، IP ثابت، ترافیک اضافه یا بدهی قبلی.</p></div>
+              <div class="module"><h3>ثبت پرداخت</h3><p>پرداخت آنلاین، کارت به کارت، نقدی، کیف پول یا تسویه نماینده.</p></div>
+              <div class="module"><h3>گزارش خروجی</h3><p>گزارش فروش، بدهکاران، پرداخت‌ها و درآمد محصول برای Excel/PDF.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="routers">
+        <div class="grid kpis">
+          <div class="card kpi"><small>روتر/NAS فعال</small><b>۱۲</b><span>MikroTik، Cisco، Huawei BRAS</span></div>
+          <div class="card kpi"><small>RADIUS Packet امروز</small><b>1.8M</b><span>Auth + Accounting</span></div>
+          <div class="card kpi"><small>IP Poolها</small><b>۳۴</b><span>PPPoE / Hotspot / VPN</span></div>
+          <div class="card kpi"><small>خطای اتصال</small><b>۲</b><span>نیازمند بررسی</span></div>
+        </div>
+
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>روترها و NASها</h2>
+              <span class="badge ok">RADIUS Clients</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>نام</th><th>نوع</th><th>IP</th><th>RADIUS</th><th>Accounting</th><th>وضعیت</th><th>عملیات</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>NAS-Tehran</td><td>MikroTik CCR</td><td>172.22.78.13</td><td><span class="badge ok">OK</span></td><td><span class="badge ok">OK</span></td><td><span class="badge ok">آنلاین</span></td><td><span class="badge blue">تنظیمات</span></td></tr>
+                <tr><td>BRAS-Mashhad</td><td>Huawei BRAS</td><td>10.20.0.2</td><td><span class="badge ok">OK</span></td><td><span class="badge warn">Delay</span></td><td><span class="badge warn">هشدار</span></td><td><span class="badge blue">Sync</span></td></tr>
+                <tr><td>NAS-Shiraz</td><td>Cisco ISG</td><td>10.30.0.8</td><td><span class="badge lock">Fail</span></td><td><span class="badge lock">Fail</span></td><td><span class="badge lock">قطع</span></td><td><span class="badge lock">بررسی</span></td></tr>
+                <tr><td>VPN-Node-2</td><td>Marzban Node</td><td>10.9.0.21</td><td><span class="badge ok">API</span></td><td><span class="badge ok">Usage</span></td><td><span class="badge ok">آنلاین</span></td><td><span class="badge blue">جزئیات</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>افزودن روتر/NAS</h2>
+              <span class="badge blue">New Device</span>
+            </div>
+            <div class="grid">
+              <div class="module">
+                <h3>اطلاعات اتصال</h3>
+                <p>نام، IP، نوع دستگاه، پورت RADIUS، secret، منطقه، tenant و وضعیت فعال/غیرفعال.</p>
+              </div>
+              <div class="module">
+                <h3>Accounting</h3>
+                <p>Acct-Start، Acct-Stop، Interim-Update، NAS-Port، Session-Id و نگاشت به یوزر.</p>
+              </div>
+              <div class="module">
+                <h3>Automation</h3>
+                <p>Push تنظیمات به MikroTik، تست اتصال، sync پورت‌ها، خواندن poolها و health check.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+              <span class="badge ok">تست RADIUS</span>
+              <span class="badge blue">Sync Pool</span>
+              <span class="badge blue">Import Ports</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid two" style="margin-top:14px">
+          <div class="card">
+            <div class="card-head"><h2>IP Poolها</h2><span class="badge blue">Address Pools</span></div>
+            <table>
+              <thead><tr><th>نام Pool</th><th>رنج</th><th>مصرف</th><th>متصل به</th></tr></thead>
+              <tbody>
+                <tr><td>pppoe-tehran-1</td><td>10.8.0.0/20</td><td>۷۲٪</td><td>NAS-Tehran</td></tr>
+                <tr><td>vpn-main</td><td>10.9.0.0/22</td><td>۴۸٪</td><td>VPN-Node-2</td></tr>
+                <tr><td>static-business</td><td>185.140.242.0/24</td><td>۳۱٪</td><td>BRAS-Mashhad</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>فلو اتصال روتر</h2><span class="badge blue">Router Provisioning</span></div>
+            <div class="flow">
+              <div class="node"><strong>تعریف NAS</strong><span>IP + Secret + Type</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>تست RADIUS</strong><span>Auth + Accounting</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>Sync</strong><span>Pool + Port + Session</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="tickets">
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head">
+              <h2>مدیریت تیکت‌ها</h2>
+              <span class="badge warn">۳ تیکت باز</span>
+            </div>
+            <table>
+              <thead>
+                <tr><th>شماره</th><th>کاربر</th><th>موضوع</th><th>اولویت</th><th>وضعیت</th><th>مسئول</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>#1042</td><td>mohsen-021</td><td>کندی سرویس شبانه</td><td><span class="badge warn">متوسط</span></td><td><span class="badge warn">باز</span></td><td>پشتیبان ۱</td></tr>
+                <tr><td>#1041</td><td>sara-vpn</td><td>مشکل تمدید آنلاین</td><td><span class="badge lock">بالا</span></td><td><span class="badge warn">در حال بررسی</span></td><td>مالی</td></tr>
+                <tr><td>#1039</td><td>office-77</td><td>درخواست IP ثابت</td><td><span class="badge blue">عادی</span></td><td><span class="badge ok">پاسخ داده شد</span></td><td>فنی</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>پاسخگویی به تیکت</h2>
+              <span class="badge blue">Ticket #1042</span>
+            </div>
+            <div class="module" style="margin-bottom:10px">
+              <h3>پیام مشترک</h3>
+              <p>از ساعت ۸ شب به بعد سرعت خیلی کم می‌شود. لطفاً بررسی کنید که مشکل از سرویس من است یا منطقه.</p>
+            </div>
+            <div class="module" style="margin-bottom:10px;background:var(--soft-blue)">
+              <h3>پاسخ اپراتور</h3>
+              <p>Session و مصرف شما بررسی شد. روی NAS تهران افت ترافیک دیده می‌شود؛ تیکت به فنی ارجاع شد.</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span class="badge ok">ارسال پاسخ</span>
+              <span class="badge blue">ارجاع به فنی</span>
+              <span class="badge warn">تغییر اولویت</span>
+              <span class="badge lock">بستن تیکت</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><h2>وضعیت پشتیبانی</h2><span class="badge ok">SLA</span></div>
+          <div class="bar-chart">
+            <div class="bar" style="height:64%" data-label="باز"></div>
+            <div class="bar" style="height:42%" data-label="ارجاع"></div>
+            <div class="bar" style="height:78%" data-label="پاسخ"></div>
+            <div class="bar" style="height:34%" data-label="مالی"></div>
+            <div class="bar" style="height:52%" data-label="فنی"></div>
+            <div class="bar" style="height:88%" data-label="بسته"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="modules">
+        <div class="grid three">
+          <div class="module"><h3>حسابداری کامل</h3><p>کیف پول، ledger، فاکتور، پرداخت، بدهی، برگشت وجه، گزارش فروش و خروجی مالی.</p></div>
+          <div class="module"><h3>مدیریت سرویس</h3><p>پلن، تمدید، تعلیق، رزوم، انقضا، تغییر سرویس و قوانین مصرف.</p></div>
+          <div class="module"><h3>نماینده و VISP</h3><p>ساختار درختی، اعتبار، قیمت اختصاصی، پورسانت چندسطحی و گزارش فروش.</p></div>
+          <div class="module"><h3>RADIUS و NAS</h3><p>FreeRADIUS، MikroTik، session، کاربران آنلاین، IP اختصاص داده شده و مصرف.</p></div>
+          <div class="module"><h3>Marzban و VPN</h3><p>ساخت اکانت، لینک اشتراک، sync مصرف، node management و تمدید خودکار.</p></div>
+          <div class="module"><h3>پشتیبانی و اعلان</h3><p>تیکت، پیامک، یادآوری تمدید، هشدار بدهی و لاگ کامل عملیات.</p></div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <div class="card-head"><h2>فلو عملیاتی سرویس</h2><span class="badge blue">Provisioning</span></div>
+          <div class="flow">
+            <div class="node"><strong>خرید لایسنس</strong><span>مالک tenant را فعال می‌کند</span></div>
+            <div class="arrow"></div>
+            <div class="node"><strong>تعریف سرویس</strong><span>پلن، NAS، Radius، Marzban</span></div>
+            <div class="arrow"></div>
+            <div class="node"><strong>مدیریت مشترک</strong><span>فاکتور، تمدید، مصرف، پشتیبانی</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="access">
+        <div class="grid layout">
+          <div class="card">
+            <div class="card-head"><h2>ماتریس دسترسی</h2><span class="badge blue">Feature Gates</span></div>
+            <div class="matrix">
+              <div>امکان</div><div>Owner</div><div>خریدار</div><div>Reseller</div>
+              <div>حسابداری و فاکتور</div><div class="yes">بله</div><div class="yes">بله</div><div class="yes">محدود</div>
+              <div>RADIUS و کاربران آنلاین</div><div class="yes">بله</div><div class="yes">بله</div><div class="yes">محدود</div>
+              <div>مدیریت لایسنس</div><div class="yes">بله</div><div class="no">خیر</div><div class="no">خیر</div>
+              <div>گزارش همه tenantها</div><div class="yes">بله</div><div class="no">خیر</div><div class="no">خیر</div>
+              <div>مقصد مشترک</div><div class="yes">بله</div><div class="no">خیر</div><div class="no">خیر</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2>Owner Access Log</h2><span class="badge ok">Audit</span></div>
+            <table>
+              <thead><tr><th>عملیات</th><th>tenant</th><th>دلیل</th></tr></thead>
+              <tbody>
+                <tr><td>ورود پشتیبانی</td><td>اپراتور شرق</td><td>رفع خطای NAS</td></tr>
+                <tr><td>تمدید لایسنس</td><td>شبکه پارس</td><td>پرداخت سالانه</td></tr>
+                <tr><td>گزارش سلامت</td><td>همه</td><td>مانیتورینگ روزانه</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="attribution">
+        <div class="tabs">
+          <button class="tab active">Session</button>
+          <button class="tab">NAT</button>
+          <button class="tab">Flow</button>
+          <button class="tab">Destination</button>
+        </div>
+
+        <div class="grid layout">
+          <div class="card owner-only">
+            <div class="card-head"><h2>گزارش مقصد مشترک</h2><span class="badge lock">Owner Only</span></div>
+            <table>
+              <thead><tr><th>مشترک</th><th>IP داخلی</th><th>مقصد</th><th>پورت</th><th>NAS</th><th>اعتماد</th></tr></thead>
+              <tbody>
+                <tr><td>user-1048</td><td>10.8.12.44</td><td>example-service.net</td><td>443</td><td>NAS-Tehran</td><td><span class="badge ok">بالا</span></td></tr>
+                <tr><td>user-2190</td><td>10.9.3.11</td><td>cdn-edge.ir</td><td>443</td><td>NAS-Mashhad</td><td><span class="badge ok">بالا</span></td></tr>
+                <tr><td>user-771</td><td>10.8.18.90</td><td>198.51.100.24</td><td>5228</td><td>NAS-Shiraz</td><td><span class="badge warn">متوسط</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card tenant-only">
+            <div class="card-head"><h2>گزارش مقصد مشترک</h2><span class="badge lock">غیرفعال</span></div>
+            <div class="blocked-panel">
+              <div>
+                <div class="lock-shape"></div>
+                <strong>این گزارش در لایسنس خریدار فعال نیست</strong>
+                <p>خریدار فقط session، IP، NAS و مصرف کلی را می‌بیند. مقصد، URL و NAT forensic برای owner باقی می‌ماند.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h2>فلو Attribution</h2><span class="badge blue">RADIUS + NAT + Flow</span></div>
+            <div class="flow">
+              <div class="node"><strong>RADIUS</strong><span>کاربر، IP، زمان اتصال</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>NAT</strong><span>IP/Port خصوصی به عمومی</span></div>
+              <div class="arrow"></div>
+              <div class="node"><strong>Flow</strong><span>مقصد، پورت، پروتکل</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const body = document.body;
+    const ownerMode = document.getElementById('ownerMode');
+    const tenantMode = document.getElementById('tenantMode');
+    const pages = document.querySelectorAll('.page');
+    const links = document.querySelectorAll('.nav-link[data-page]');
+
+    function setMode(mode) {
+      body.classList.toggle('tenant-mode', mode === 'tenant');
+      body.classList.toggle('owner-mode', mode === 'owner');
+      ownerMode.classList.toggle('active', mode === 'owner');
+      tenantMode.classList.toggle('active', mode === 'tenant');
+    }
+
+    function setPage(id) {
+      pages.forEach(page => page.classList.toggle('active', page.id === id));
+      links.forEach(link => link.classList.toggle('active', link.dataset.page === id));
+    }
+
+    ownerMode.addEventListener('click', () => setMode('owner'));
+    tenantMode.addEventListener('click', () => setMode('tenant'));
+    links.forEach(link => link.addEventListener('click', () => setPage(link.dataset.page)));
+  </script>
+</body>
+</html>
